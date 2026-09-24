@@ -1,0 +1,233 @@
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { ChatInput } from "@/components/chatbot/ChatInput";
+import { ChatMessage } from "@/components/chatbot/ChatMessage";
+import { QuickActions } from "@/components/chatbot/QuickActions";
+import { SourceCards } from "@/components/chatbot/SourceCards";
+import { MAX_MESSAGE_LENGTH } from "@/lib/chat/limits";
+
+afterEach(cleanup);
+
+describe("chat input and quick actions", () => {
+  it("captures and trims input before clearing it", () => {
+    const onSend = vi.fn();
+    render(<ChatInput disabled={false} onSend={onSend} />);
+    const input = screen.getByLabelText("Ask the Autrey Mill information assistant");
+    fireEvent.change(input, { target: { value: "  Where can I donate food?  " } });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+    expect(onSend).toHaveBeenCalledWith("Where can I donate food?");
+    expect(onSend.mock.calls[0]?.[0]).not.toHaveProperty("preventDefault");
+    expect((input as HTMLTextAreaElement).value).toBe("");
+  });
+
+  it("routes Enter and the submit button through the same callback", () => {
+    const onSend = vi.fn();
+    render(<ChatInput disabled={false} onSend={onSend} />);
+    const input = screen.getByLabelText("Ask the Autrey Mill information assistant");
+    fireEvent.change(input, { target: { value: "First question?" } });
+    fireEvent.keyDown(input, { key: "Enter", shiftKey: false });
+    fireEvent.change(input, { target: { value: "Second question?" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send message" }));
+    expect(onSend.mock.calls.map(([value]) => value)).toEqual([
+      "First question?",
+      "Second question?",
+    ]);
+  });
+
+  it("shows and enforces the browser message limit", () => {
+    render(<ChatInput disabled={false} onSend={vi.fn()} />);
+    const input = screen.getByLabelText("Ask the Autrey Mill information assistant");
+    expect(input.getAttribute("maxlength")).toBe(String(MAX_MESSAGE_LENGTH));
+    fireEvent.change(input, {
+      target: { value: "x".repeat(MAX_MESSAGE_LENGTH + 25) },
+    });
+    expect((input as HTMLTextAreaElement).value).toHaveLength(
+      MAX_MESSAGE_LENGTH,
+    );
+    expect(
+      screen.getByText(`${MAX_MESSAGE_LENGTH}/${MAX_MESSAGE_LENGTH}`),
+    ).toBeDefined();
+  });
+
+  it("sends quick actions as natural-language strings", () => {
+    const onSelect = vi.fn();
+    render(<QuickActions onSelect={onSelect} />);
+    fireEvent.click(screen.getByRole("button", { name: "Hours & admission" }));
+    expect(onSelect).toHaveBeenCalledWith("What are Autrey Mill's hours, and does it cost anything to visit?");
+    expect(typeof onSelect.mock.calls[0]?.[0]).toBe("string");
+  });
+
+  it("localizes the composer and quick actions in Spanish", () => {
+    const onSelect = vi.fn();
+    render(
+      <>
+        <ChatInput disabled={false} onSend={vi.fn()} language="es" />
+        <QuickActions onSelect={onSelect} language="es" />
+      </>,
+    );
+    expect(screen.getByLabelText(/Pregúntale al asistente/i)).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Horarios y entrada" }));
+    expect(onSelect).toHaveBeenCalledWith("¿Cuál es el horario de Autrey Mill y cuesta algo visitarlo?");
+  });
+});
+
+describe("safe message rendering", () => {
+  it("renders supported Markdown for assistant answers", () => {
+    render(
+      <ChatMessage
+        message={{
+          id: "assistant-markdown",
+          role: "assistant",
+          includeInHistory: true,
+          content:
+            "### Food help\n\n**Start here**\n\n- Pantry\n- Mobile pantry\n\n1. Choose a county\n2. Ask for details\n\nUse `Forsyth` when relevant.",
+        }}
+      />,
+    );
+    expect(screen.getByRole("heading", { name: "Food help" })).toBeDefined();
+    expect(screen.getByText("Start here").tagName).toBe("STRONG");
+    expect(screen.getAllByRole("list")).toHaveLength(2);
+    expect(screen.getByText("Forsyth").tagName).toBe("CODE");
+  });
+
+  it("keeps user content escaped and plain", () => {
+    const { container } = render(
+      <ChatMessage
+        message={{
+          id: "user-text",
+          role: "user",
+          includeInHistory: true,
+          content: "<img src=x onerror=alert(1)> **not bold**",
+        }}
+      />,
+    );
+    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector("strong")).toBeNull();
+    expect(
+      screen.getByText("<img src=x onerror=alert(1)> **not bold**"),
+    ).toBeDefined();
+  });
+
+  it("does not render raw HTML in assistant Markdown", () => {
+    const { container } = render(
+      <ChatMessage
+        message={{
+          id: "assistant-html",
+          role: "assistant",
+          includeInHistory: true,
+          content: "Safe text <script>alert('x')</script> <img src=x>",
+        }}
+      />,
+    );
+    expect(container.querySelector("script")).toBeNull();
+    expect(container.querySelector("img")).toBeNull();
+  });
+
+  it("does not make unsupported Markdown URLs clickable", () => {
+    render(
+      <ChatMessage
+        message={{
+          id: "bad-link",
+          role: "assistant",
+          includeInHistory: true,
+          content: "[Unknown site](https://example.com/private)",
+        }}
+      />,
+    );
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByText("Unknown site").tagName).toBe("SPAN");
+  });
+
+  it("does not load model-generated Markdown images", () => {
+    const { container } = render(
+      <ChatMessage
+        message={{
+          id: "external-image",
+          role: "assistant",
+          includeInHistory: true,
+          content: "![Tracking pixel](https://example.com/pixel.png)",
+        }}
+      />,
+    );
+    expect(container.querySelector("img")).toBeNull();
+    expect(screen.getByText("Tracking pixel").tagName).toBe("SPAN");
+  });
+
+  it("allows approved Autrey Mill Markdown links safely", () => {
+    render(
+      <ChatMessage
+        message={{
+          id: "good-link",
+          role: "assistant",
+          includeInHistory: true,
+          content:
+            "[Food donations](https://autreymill.org/food-donations)",
+        }}
+      />,
+    );
+    const link = screen.getByRole("link", { name: "Food donations" });
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+  });
+
+  it("shows only linked source cards and omits staff text without a URL", () => {
+    render(
+      <SourceCards
+        sources={[
+          {
+            id: "staff",
+            title: "Information provided by Autrey Mill staff",
+            sourceType: "manager_faq",
+          },
+          {
+            id: "website",
+            title: "Food Donations | Support Community Through Donations — Autrey Mill",
+            url: "https://autreymill.org/food-donations",
+            sourceType: "official_website",
+          },
+          {
+            id: "handbook",
+            title: "Autrey Mill Volunteer Handbook",
+            url: "https://autreymill.org/volunteer-handbook",
+            sourceType: "official_document",
+          },
+        ]}
+      />,
+    );
+    expect(
+      screen.queryByText("Information provided by Autrey Mill staff"),
+    ).toBeNull();
+    const website = screen.getByRole("link", {
+      name: /Food Donations.*View on the Autrey Mill website/,
+    });
+    expect(website.getAttribute("href")).toBe(
+      "https://autreymill.org/food-donations",
+    );
+    expect(
+      screen.getByRole("link", { name: /Volunteer Handbook.*View on the Autrey Mill website/ }),
+    ).toBeDefined();
+  });
+
+  it("deduplicates source cards that resolve to the same official URL", () => {
+    render(
+      <SourceCards
+        sources={[
+          {
+            id: "website-a",
+            title: "Food Donations",
+            url: "https://autreymill.org/food-donations",
+            sourceType: "official_website",
+          },
+          {
+            id: "website-b",
+            title: "Duplicate Food Donations",
+            url: "https://autreymill.org/food-donations",
+            sourceType: "official_website",
+          },
+        ]}
+      />,
+    );
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
+});

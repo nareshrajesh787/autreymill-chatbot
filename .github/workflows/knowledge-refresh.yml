@@ -1,0 +1,157 @@
+name: Detect and commit Autrey Mill website knowledge updates
+
+on:
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types:
+      - autrey-mill-website-updated
+
+permissions:
+  contents: write
+
+concurrency:
+  group: knowledge-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Crawl, prepare, and verify public website content
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if npm run knowledge:crawl; then
+              break
+            fi
+            if (( attempt == 3 )); then
+              echo "The public website crawl failed after three bounded attempts."
+              exit 1
+            fi
+            delay_seconds=$(( attempt * 30 ))
+            echo "The public website crawl failed; waiting ${delay_seconds} seconds before retry $(( attempt + 1 )) of 3."
+            sleep "$delay_seconds"
+          done
+          npm run knowledge:prepare:website
+          npm run knowledge:verify
+
+      - name: Detect meaningful corpus changes
+        id: changes
+        shell: bash
+        run: |
+          review_paths=(
+            knowledge/generated/crawl-health.json
+            knowledge/generated/prepared
+          )
+
+          knowledge_changes="$(git status --porcelain --untracked-files=all -- "${review_paths[@]}")"
+          if [[ -z "$knowledge_changes" ]]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No verified public knowledge changes were detected; main and Gemini were left untouched." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Guard the generated-file boundary
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          unexpected="$(git status --porcelain | cut -c4- | grep -Ev '^(knowledge/generated/|src/generated/knowledge-manifest\.json$)' || true)"
+          if [[ -n "$unexpected" ]]; then
+            echo "The public refresh modified files outside its generated-file boundary:"
+            echo "$unexpected"
+            exit 1
+          fi
+
+          staff_faq_changes="$(git status --porcelain --untracked-files=all -- \
+            knowledge/generated/manager-faq.json \
+            knowledge/generated/manager-faq-approved.md \
+            knowledge/generated/manager-faq-pending.md \
+            knowledge/generated/manager-faq-report.json \
+            ':(glob)knowledge/generated/prepared/manager_faq__*.md')"
+          if [[ -n "$staff_faq_changes" ]]; then
+            echo "The public website refresh changed staff-managed FAQ files. Refusing to continue."
+            echo "$staff_faq_changes"
+            exit 1
+          fi
+
+      - name: Enforce a bounded automatic change set
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          changed_documents="$(git status --porcelain --untracked-files=all -- knowledge/generated/prepared | grep -c . || true)"
+          deleted_paths="$(git diff --name-only --diff-filter=D HEAD -- knowledge/generated/prepared)"
+          deleted_documents="$(printf '%s\n' "$deleted_paths" | grep -c . || true)"
+          approved_removals="$(node -e "const fs=require('node:fs');const v=JSON.parse(fs.readFileSync('knowledge/generated/crawl-health.json','utf8'));if(!Array.isArray(v.approvedRemovedPages))process.exit(2);process.stdout.write(String(v.approvedRemovedPages.length));")"
+          unexpected_deletions="$(printf '%s\n' "$deleted_paths" | grep -Ev '^$|^knowledge/generated/prepared/website__[^/]+\.md$' || true)"
+          echo "Prepared documents changed: $changed_documents; deleted: $deleted_documents; explicitly approved removals: $approved_removals" >> "$GITHUB_STEP_SUMMARY"
+
+          if (( changed_documents > 10 )); then
+            echo "The refresh changed $changed_documents prepared documents, exceeding the automatic safety limit of 10. Manual review is required."
+            exit 1
+          fi
+
+          if [[ -n "$unexpected_deletions" ]]; then
+            echo "Only website Markdown files may be removed automatically:"
+            echo "$unexpected_deletions"
+            exit 1
+          fi
+
+          if (( deleted_documents != approved_removals )); then
+            echo "The refresh deleted $deleted_documents prepared documents, but crawl-health.json records $approved_removals explicitly approved removals. Refusing to continue."
+            exit 1
+          fi
+
+          if (( deleted_documents > 2 )); then
+            echo "The refresh would remove $deleted_documents documents, exceeding the automatic removal limit of 2. Manual review is required."
+            exit 1
+          fi
+
+      - name: Run the complete safety gate
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          npm audit --audit-level=high
+          npm test
+          npm run lint
+          npm exec tsc -- --noEmit
+          npm run build
+          git diff --check
+
+      - name: Commit verified knowledge directly to main
+        if: steps.changes.outputs.changed == 'true'
+        id: commit
+        shell: bash
+        run: |
+          git fetch origin main
+          if [[ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]]; then
+            echo "main advanced during validation. Refusing to overwrite it; the next run will recrawl from the new revision."
+            exit 1
+          fi
+
+          git config user.name "autrey-mill-knowledge-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A knowledge/generated src/generated/knowledge-manifest.json
+          git diff --cached --check
+          git commit -m "Refresh Autrey Mill website knowledge"
+          revision="$(git rev-parse HEAD)"
+          git push origin HEAD:main
+          echo "Committed verified public knowledge to main at $revision. Vercel will reconcile Gemini during the production build." >> "$GITHUB_STEP_SUMMARY"

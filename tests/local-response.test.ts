@@ -1,0 +1,167 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  focusConversationalQuery,
+  getLocalConversationalResponse,
+} from "@/lib/chat/local-response";
+import type { SourceManifestEntry } from "@/lib/knowledge/types";
+
+const officialDocuments: SourceManifestEntry[] = [
+  {
+    id: "volunteer-handbook-2026",
+    fileName: "official_document__volunteer-handbook-2026.pdf",
+    documentPath:
+      "knowledge/generated/prepared/official_document__volunteer-handbook-2026.pdf",
+    title: "Autrey Mill Volunteer Handbook - Version 1.1 (June 24, 2026)",
+    url: "https://autreymill.org/volunteer-handbook",
+    sourceType: "official_document",
+    priority: 75,
+  },
+  {
+    id: "heart-of-service-july-2026",
+    fileName: "official_document__heart-of-service-july-2026.pdf",
+    documentPath:
+      "knowledge/generated/prepared/official_document__heart-of-service-july-2026.pdf",
+    title: "Heart of Service - July 2026 Birthday Cake Kits",
+    url: "https://autreymill.org/heart-of-service",
+    sourceType: "official_document",
+    priority: 75,
+  },
+];
+
+describe("local conversational responses", () => {
+  it.each(["hello", "Hi!", "good morning", "HEY THERE?"])(
+    "recognizes a standalone greeting: %j",
+    (message) => {
+      const response = getLocalConversationalResponse(message);
+
+      expect(response?.status).toBe("answered");
+      expect(response?.contactRecommended).toBe(false);
+      expect(response?.sources[0]?.url).toBe("https://autreymill.org/");
+    },
+  );
+
+  it.each(["hii", "hellooo", "heyy there", "helo there!"])(
+    "recognizes a harmlessly misspelled standalone greeting: %j",
+    (message) => {
+      expect(getLocalConversationalResponse(message)?.status).toBe("answered");
+    },
+  );
+
+  it.each([
+    ["hola", "¡Hola!"],
+    ["namaste", "Namaste!"],
+    ["salaam", "Ahlan!"],
+    ["bonjour", "Bonjour !"],
+    ["kumusta", "Kumusta!"],
+  ])("answers a common multilingual greeting locally in Auto: %j", (message, expected) => {
+    const response = getLocalConversationalResponse(message, [], "auto");
+    expect(response?.status).toBe("answered");
+    expect(response?.answer).toContain(expected);
+  });
+
+  it("honors an explicit response language for a greeting", () => {
+    expect(getLocalConversationalResponse("hola", [], "en")?.answer).toMatch(
+      /^Hi! /,
+    );
+    expect(getLocalConversationalResponse("hello", [], "es")?.answer).toMatch(
+      /^¡Hola! /,
+    );
+  });
+
+  it.each([
+    [
+      "Hii, pls who can I contcat about thrift donations please?",
+      "who can i contcat about thrift donations",
+    ],
+    ["Hello there — what are your hours, thanks", "what are your hours"],
+    ["Good afternoon! I need food help.", "i need food help"],
+  ])("focuses the substantive query without changing its meaning", (message, expected) => {
+    expect(focusConversationalQuery(message)).toBe(expected);
+  });
+
+  it.each([
+    "what questions can You answer",
+    "What can you help me with?",
+    "which topics can i ask?",
+  ])("explains supported question areas: %j", (message) => {
+    expect(getLocalConversationalResponse(message)?.answer).toContain(
+      "summer and school-break camps",
+    );
+  });
+
+  it("does not intercept an organization-information question", () => {
+    expect(
+      getLocalConversationalResponse(
+        "Hello, who handles thrift store donations?",
+      ),
+    ).toBeUndefined();
+  });
+
+  it.each([
+    "handbook",
+    "the handbook",
+    "hi do u have access to the handbook?",
+    "Hello, can you help me with the handbook?",
+    "Good afternoon — do you know about the handbook?",
+    "hii do u hav acess to the handbok?",
+    "helo can u halp with the handboook?",
+    "do u have access to the handbook?",
+    "do u have access to the volunteer handbook?",
+    "Do you have access to the volunteer handbook?",
+    "Can you read Autrey Mill volunteer handbook?",
+    "Are you able to reference the volunteer handbook?",
+    "Can you help me with the handbook?",
+    "I need help with the handbook.",
+    "Do you know about the handbook?",
+  ])("confirms access only from the registered official document: %j", (message) => {
+    const response = getLocalConversationalResponse(message, officialDocuments);
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        status: "answered",
+        contactRecommended: false,
+        sources: [
+          expect.objectContaining({
+            id: "volunteer-handbook-2026",
+            url: "https://autreymill.org/volunteer-handbook",
+            sourceType: "official_document",
+          }),
+        ],
+      }),
+    );
+    expect(response?.answer).toMatch(/^Yes/);
+    expect(response?.answer).toContain("Volunteer Handbook");
+    expect(response?.answer).toContain("What would you like to know?");
+  });
+
+  it("sends factual handbook questions through grounded File Search", () => {
+    expect(
+      getLocalConversationalResponse(
+        "What does the handbook say about volunteer age requirements?",
+        officialDocuments,
+      ),
+    ).toBeUndefined();
+  });
+
+  it("does not claim access to an unregistered or ambiguous document", () => {
+    expect(
+      getLocalConversationalResponse(
+        "Do you have access to my volunteer application?",
+        officialDocuments,
+      ),
+    ).toBeUndefined();
+    expect(
+      getLocalConversationalResponse(
+        "Hii, do u hav acess to my volunter application?",
+        officialDocuments,
+      ),
+    ).toBeUndefined();
+    expect(
+      getLocalConversationalResponse(
+        "Do you have access to that document?",
+        officialDocuments,
+      ),
+    ).toBeUndefined();
+  });
+});
