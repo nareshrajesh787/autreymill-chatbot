@@ -723,7 +723,13 @@
   "unmappedSourceDocuments": [],
   "totalDocumentsPrepared": 114,
   "officialDocuments": [],
-  "totalDocumentsUploaded": 0,
+  "totalDocumentsUploaded": 114,
   "uploadFailures": [],
-  "fileSearchStoreName": null
+  "fileSearchStoreName": "fileSearchStores/autrey-mill-grounded-knowle-0tslhhrmdn3i",
+  "syncMode": "new-store",
+  "totalDocumentsDeleted": 0,
+  "totalDocumentsUnchanged": 0,
+  "managedDocumentsAfterSync": 114,
+  "deleteFailures": [],
+  "uploadedAt": "2026-09-25T01:26:47.377Z"
 }
