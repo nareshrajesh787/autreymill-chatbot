@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   askGroundedQuestion,
   interpretGroundedInteraction,
+  stripCitationMarkers,
 } from "@/lib/gemini/chat";
 import type { SourceManifestEntry } from "@/lib/knowledge/types";
 
@@ -146,5 +147,22 @@ describe("grounded interaction interpretation", () => {
         ]),
       }),
     );
+  });
+});
+
+describe("answer text cleanup", () => {
+  it("removes File Search citation markers but keeps Markdown links and prices", () => {
+    expect(
+      stripCitationMarkers(
+        "I can't check live availability in camp [5.5]. Register online [1, 3].",
+      ),
+    ).toBe("I can't check live availability in camp. Register online.");
+    expect(stripCitationMarkers("See [the hours page](https://autreymill.org/about/hours/).")).toBe(
+      "See [the hours page](https://autreymill.org/about/hours/).",
+    );
+    expect(stripCitationMarkers("Sessions cost $50.00 [2] for ages 5-14.")).toBe(
+      "Sessions cost $50.00 for ages 5-14.",
+    );
+    expect(stripCitationMarkers("Quels sont les horaires ?")).toBe("Quels sont les horaires ?");
   });
 });

@@ -171,10 +171,19 @@ export function interpretGroundedInteraction(
 
   return {
     status: "answered",
-    answer: parsed.answer,
+    answer: stripCitationMarkers(parsed.answer),
     sources,
     contactRecommended: false,
   };
+}
+
+// File Search sometimes leaves retrieval markers such as "[5.5]" or "[1, 3]"
+// in the answer text. Sources are shown as separate cards, so the markers are
+// removed; Markdown links ("[label](url)") are never bracketed digits only.
+const CITATION_MARKER = /\s?\[\d+(?:\.\d+)?(?:\s*,\s*\d+(?:\.\d+)?)*\](?!\()/g;
+
+export function stripCitationMarkers(answer: string): string {
+  return answer.replace(CITATION_MARKER, "").trim();
 }
 
 export async function askGroundedQuestion(
