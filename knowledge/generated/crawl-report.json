@@ -1,6 +1,6 @@
 {
   "startedFrom": "https://autreymill.org",
-  "crawledAt": "2026-09-24T18:36:32.838Z",
+  "crawledAt": "2026-09-28T17:41:30.838Z",
   "maxPages": 250,
   "indexedPages": [
     {
@@ -631,7 +631,7 @@
       "id": "web-veolia-9216d797",
       "title": "Veolia – Autrey Mill",
       "url": "https://autreymill.org/veolia/",
-      "fetchedAt": "2026-09-24T18:36:10.784Z"
+      "fetchedAt": "2026-09-28T17:41:15.160Z"
     },
     {
       "id": "web-wedding-expo-777f77bc",
@@ -690,11 +690,11 @@
   ],
   "failedPages": [
     {
-      "url": "https://autreymill.org/support/supporters-sponsors/",
+      "url": "https://autreymill.org/autrey-mill-covid-accommodations/",
       "reason": "HTTP 404"
     },
     {
-      "url": "https://autreymill.org/autrey-mill-covid-accommodations/",
+      "url": "https://autreymill.org/support/supporters-sponsors/",
       "reason": "HTTP 404"
     }
   ],
@@ -780,6 +780,10 @@
       "reason": "No meaningful public page content found"
     },
     {
+      "url": "https://autreymill.org/support/animals-of-autrey-mill-sponsorship/",
+      "reason": "No meaningful public page content found"
+    },
+    {
       "url": "https://autreymill.org/img_0114/",
       "reason": "No meaningful public page content found"
     },
@@ -788,15 +792,15 @@
       "reason": "No meaningful public page content found"
     },
     {
-      "url": "https://autreymill.org/img_1957/",
-      "reason": "No meaningful public page content found"
-    },
-    {
       "url": "https://autreymill.org/img_1961/",
       "reason": "No meaningful public page content found"
     },
     {
-      "url": "https://autreymill.org/johnscreekcrawl113/",
+      "url": "https://autreymill.org/img_1957/",
+      "reason": "No meaningful public page content found"
+    },
+    {
+      "url": "https://autreymill.org/johnscreekcrawl009/",
       "reason": "No meaningful public page content found"
     },
     {
@@ -804,7 +808,7 @@
       "reason": "No meaningful public page content found"
     },
     {
-      "url": "https://autreymill.org/johnscreekcrawl026/",
+      "url": "https://autreymill.org/johnscreekcrawl113/",
       "reason": "No meaningful public page content found"
     },
     {
@@ -816,19 +820,11 @@
       "reason": "No meaningful public page content found"
     },
     {
-      "url": "https://autreymill.org/johnscreekcrawl009/",
-      "reason": "No meaningful public page content found"
-    },
-    {
-      "url": "https://autreymill.org/support/animals-of-autrey-mill-sponsorship/",
+      "url": "https://autreymill.org/johnscreekcrawl026/",
       "reason": "No meaningful public page content found"
     }
   ],
   "duplicatePages": [
-    {
-      "url": "https://autreymill.org/programs/on-demand/",
-      "duplicateOf": "https://autreymill.org/programs/on-demand-programs/"
-    },
     {
       "url": "https://autreymill.org/programs/scouts/",
       "duplicateOf": "https://autreymill.org/plan-your-event/scouts/"
@@ -836,6 +832,10 @@
     {
       "url": "https://autreymill.org/rentals/",
       "duplicateOf": "https://autreymill.org/plan-your-event/rentals/"
+    },
+    {
+      "url": "https://autreymill.org/programs/on-demand/",
+      "duplicateOf": "https://autreymill.org/programs/on-demand-programs/"
     },
     {
       "url": "https://autreymill.org/spring-night-hikes/",

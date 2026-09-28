@@ -1,5 +1,5 @@
 {
-  "preparedAt": "2026-09-24T18:36:33.060Z",
+  "preparedAt": "2026-09-28T17:41:31.256Z",
   "successfullyIndexedPages": [
     {
       "id": "web-home-47a281eb",
@@ -629,7 +629,7 @@
       "id": "web-veolia-9216d797",
       "title": "Veolia – Autrey Mill",
       "url": "https://autreymill.org/veolia/",
-      "fetchedAt": "2026-09-24T18:36:10.784Z"
+      "fetchedAt": "2026-09-28T17:41:15.160Z"
     },
     {
       "id": "web-wedding-expo-777f77bc",
@@ -688,19 +688,15 @@
   ],
   "failedPages": [
     {
-      "url": "https://autreymill.org/support/supporters-sponsors/",
+      "url": "https://autreymill.org/autrey-mill-covid-accommodations/",
       "reason": "HTTP 404"
     },
     {
-      "url": "https://autreymill.org/autrey-mill-covid-accommodations/",
+      "url": "https://autreymill.org/support/supporters-sponsors/",
       "reason": "HTTP 404"
     }
   ],
   "duplicatePages": [
-    {
-      "url": "https://autreymill.org/programs/on-demand/",
-      "duplicateOf": "https://autreymill.org/programs/on-demand-programs/"
-    },
     {
       "url": "https://autreymill.org/programs/scouts/",
       "duplicateOf": "https://autreymill.org/plan-your-event/scouts/"
@@ -708,6 +704,10 @@
     {
       "url": "https://autreymill.org/rentals/",
       "duplicateOf": "https://autreymill.org/plan-your-event/rentals/"
+    },
+    {
+      "url": "https://autreymill.org/programs/on-demand/",
+      "duplicateOf": "https://autreymill.org/programs/on-demand-programs/"
     },
     {
       "url": "https://autreymill.org/spring-night-hikes/",
@@ -723,13 +723,7 @@
   "unmappedSourceDocuments": [],
   "totalDocumentsPrepared": 114,
   "officialDocuments": [],
-  "totalDocumentsUploaded": 114,
+  "totalDocumentsUploaded": 0,
   "uploadFailures": [],
-  "fileSearchStoreName": "fileSearchStores/autrey-mill-grounded-knowle-0tslhhrmdn3i",
-  "syncMode": "new-store",
-  "totalDocumentsDeleted": 0,
-  "totalDocumentsUnchanged": 0,
-  "managedDocumentsAfterSync": 114,
-  "deleteFailures": [],
-  "uploadedAt": "2026-09-25T01:26:47.377Z"
+  "fileSearchStoreName": null
 }
