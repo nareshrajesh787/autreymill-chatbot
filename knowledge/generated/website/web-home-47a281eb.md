@@ -3,7 +3,7 @@
 Source ID: web-home-47a281eb
 Source type: official_website
 Canonical URL: https://autreymill.org/
-Fetched at: 2026-09-24T18:35:50.102Z
+Fetched at: 2026-09-30T15:56:20.257Z
 
 ## Page content
 
@@ -27,12 +27,14 @@ Explore our beautiful nature…
 Fall Break Camp
 Fall Break Camp gives kids a chance to get outside, explore, create, and make new friends with a variety of fun themes, including…
 Thank You Supporters of Autrey Mill!
+Thank you to our 2026 Spooky Mill Paranormal sponsors, Back Nine Golf – Alpharetta!
+Thank you to our 2026 Spooky Mill & Ghosts and Goblins Gala Paranormal sponsors, The Creek, a Johns Creek Magazine!
 Thank you to elm 3 Financial Group for their sponsorship of Autrey Mill’s Earth Day Celebration!
 A heartfelt thank you to Johns Creek Baptist Church whose 2nd annual JCBC Jaunt 5k and 1-mile Fun Run raised over $7,000 for the Autrey Mill Nature Preserve Summer Camp Scholarship Fund for 2026.
 Thank you for supporting Autrey Mill Nature Preserve’s creek cleanup effort and helping us care for our Johns Creek fish tank!
-Thank you for being a fantastic community partner supporting Autrey Mill NP events including the Behind the Music series, the Ghosts and Goblins Gala and Spooky Mill, and choosing AMNP for their first macaroni and cheese cook off!!
+Thank you for being a fantastic community partner supporting Autrey Mill NP events including the Behind the Music series, the Ghosts and Goblins Gala and Spooky Mill 2026!
 Thank you to Kona Ice for their sponsorship of Autrey Mill’s Earth Day Celebration!
-Thank you to our 2025 Spooky Mill and Ghosts and Goblins Gala paranormal sponsors!
+Thank you to our 2026 Spooky Mill and Ghosts and Goblins Gala paranormal sponsors!
 Thank you to Critter Depot for a generous donation of crickets and superworms for our animal ambassadors! https://www.thecritterdepot.com/
 Thanks to the Johns Creek Convention and Visitors Bureau for their generous support of Autrey Mill Nature Preserve’s cultural events.
 Autrey Mill Nature Preserve would like to extend a sincere and heartfelt end-of-year thank you to the residents of the Country Club of the South (CCS) and the CCS Charity Guild for your incredible support. The Country Club of the South Charity Guild’s generosity in 2025 supported campers in need from across our community: six from Johns Creek, two from Duluth, two from Peachtree Corners, four from Alpharetta, and one from Roswell. The support for our Summer Camp programs truly made a difference. We are deeply grateful for your commitment to our community.

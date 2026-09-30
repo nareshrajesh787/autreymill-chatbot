@@ -3,8 +3,8 @@
 Source ID: web-special-events-spooky-mill-182f457c
 Source type: official_website
 Canonical URL: https://autreymill.org/special-events/spooky-mill/
-Last updated: 2026-09-04
-Fetched at: 2026-09-24T18:36:29.348Z
+Last updated: 2026-09-29
+Fetched at: 2026-09-30T15:57:15.415Z
 
 ## Page content
 
@@ -15,5 +15,5 @@ This is a family event designed for all ages. A parent or guardian must accompan
 Questions? Email info@autreymill.org.
 Tickets:
 Buy your “Unlimited” Wristbands now! Individual tickets are also available when you arrive. We will accept credit, debit, Venmo, and cash on the day of the event. Each Ticket is equal to $1.00.
-Sponsorships Available
 Thank you to our Paranormal Sponsors!
+Thank you to our Skeleton Sponsors!

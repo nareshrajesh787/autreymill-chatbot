@@ -3,12 +3,13 @@
 Source ID: web-special-events-spooky-mill-182f457c
 Source type: official_website
 Canonical URL: https://autreymill.org/special-events/spooky-mill/
-Last updated on the Autrey Mill website: 2026-09-04
+Last updated on the Autrey Mill website: 2026-09-29
 
 ## Important headings
 
 - Autrey Mill Nature Preserve’s Halloween Fundraiser, Spooky Mill, will return on Saturday, October 10th, 2026, from 2 PM-9 PM!
-- Sponsorships Available
+- Thank you to our Paranormal Sponsors!
+- Thank you to our Skeleton Sponsors!
 
 ## Approved page content
 
@@ -19,5 +20,5 @@ This is a family event designed for all ages. A parent or guardian must accompan
 Questions? Email info@autreymill.org.
 Tickets:
 Buy your “Unlimited” Wristbands now! Individual tickets are also available when you arrive. We will accept credit, debit, Venmo, and cash on the day of the event. Each Ticket is equal to $1.00.
-Sponsorships Available
 Thank you to our Paranormal Sponsors!
+Thank you to our Skeleton Sponsors!
